@@ -13,7 +13,7 @@ def show_passenger_count_bar_chart(df):
         x='Passenger Count',
         y='Number of Trips',
         title='Distribution of Passenger Count',
-        labels={'Number of Trips': 'Anzahl Fahrten', 'Passenger Count': 'Passagiere'},
+        labels={'Number of Trips': 'Number of Trips', 'Passenger Count': 'Passenger Count'},
         color_discrete_sequence=['#f7b731'],
     )
     fig.update_layout(
