@@ -25,16 +25,19 @@ streamlit run 🏠_Home.py
 ```
 
 ## TODO
-- Plot Missing Values (Data Quality Metrics)
-- Univariate Analysis (alle Dropdown mit Spaltenauswahl):
+- Plot Missing Values (Data Quality Metrics) - David
+- Univariate Analysis (alle Dropdown mit Spaltenauswahl): - David
     - Boxplot
     - Histogram (Kontinuierlich)
     - Bar Chart (Categorical)
     - PieChart (Anteile von kategorischen Variablen)
-- Bivariate Analysis
+- Bivariate Analysis: - Jan
     - Correlation Heatmap
     - Line Chart (flexibel kontinuierliche Variablen auswählen)
     - Scatter Plot ()
+- Advanced Methods
+    - Geovisualiation over Time - Jan
+    - Fare amount predicotor (Regression) - David
 
 ## Preview
 
