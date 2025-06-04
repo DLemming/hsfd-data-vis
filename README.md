@@ -24,6 +24,18 @@ Make sure you're in the project root. Run the Streamlit app with:
 streamlit run 🏠_Home.py
 ```
 
+## TODO
+- Plot Missing Values (Data Quality Metrics)
+- Univariate Analysis (alle Dropdown mit Spaltenauswahl):
+    - Boxplot
+    - Histogram (Kontinuierlich)
+    - Bar Chart (Categorical)
+    - PieChart (Anteile von kategorischen Variablen)
+- Bivariate Analysis
+    - Correlation Heatmap
+    - Line Chart (flexibel kontinuierliche Variablen auswählen)
+    - Scatter Plot ()
+
 ## Preview
 
 ## Dataset
