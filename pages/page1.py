@@ -1,3 +1,3 @@
 import streamlit as st
 
-st.title('Page 1')
+st.title('Geo visualization over time')
