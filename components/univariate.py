@@ -36,7 +36,7 @@ def render_pie_chart(df: pd.DataFrame):
 
 ### Private Methods ###
 def __boxplot(df: pd.DataFrame, column: str):
-    fig = px.box(df, y=column, points="all")
+    fig = px.box(df, y=column, points="outliers")
     st.plotly_chart(fig, use_container_width=True)
 
 def __histogram(df: pd.DataFrame, column: str):
