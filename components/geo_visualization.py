@@ -52,7 +52,7 @@ def plot_geo_visualization(df):
             data=df_pickup,
             get_position='[lon, lat]',
             get_fill_color='[0, 102, 255, 160]',
-            get_radius=10
+            get_radius=20
         ))
 
         layers.append(pdk.Layer(
@@ -60,7 +60,7 @@ def plot_geo_visualization(df):
             data=df_dropoff,
             get_position='[lon, lat]',
             get_fill_color='[255, 0, 0, 160]',
-            get_radius=10
+            get_radius=20
         ))
 
         center_lat = pd.concat([df_pickup['lat'], df_dropoff['lat']]).mean()

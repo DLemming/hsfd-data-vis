@@ -25,6 +25,6 @@ def plot_corr_heatmap(df):
     # Plot erstellen
     fig, ax = plt.subplots(figsize=(10, 8))
     sns.heatmap(corr, annot=True, fmt=".2f", cmap="coolwarm", square=True, ax=ax, cbar=True)
-    ax.set_title("Korrelationsmatrix (ohne RatecodeID)")
+    ax.set_title("Correlationmatrix ")
 
     st.pyplot(fig)
