@@ -64,8 +64,7 @@ def plot_geo_visualization(df):
                 radiusPixels=15,
                 intensity=0.4,
                 threshold=0.03
-)
-)
+            ))
         else:
             layers.append(pdk.Layer(
                 "ScatterplotLayer",
