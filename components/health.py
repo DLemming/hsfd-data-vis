@@ -20,7 +20,7 @@ def render_health_component(df: pd.DataFrame):
 
     with st.expander("Select columns for health check"):
         selected_cols = st.multiselect(
-            "", options=filtered_cols,
+            "Select columnse", options=filtered_cols,
             default=filtered_cols,
             label_visibility="collapsed"
         )
