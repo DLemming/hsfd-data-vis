@@ -12,4 +12,5 @@ dependencies = [
     "plotly==6.1.2",
     "pydeck>=0.9.1",
     "scikit-learn>=1.7.0",
+    "seaborn==0.13.2"
 ]
