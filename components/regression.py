@@ -65,7 +65,7 @@ def show_regression_inputs(model, df):
 
     with col1:
         st.pydeck_chart(pdk.Deck(
-            map_style="mapbox://styles/mapbox/light-v9",
+
             initial_view_state=pdk.ViewState(
                 latitude=40.73,
                 longitude=-73.93,
@@ -118,8 +118,7 @@ def plot_regression(model, df):
     fig1.update_layout(
         title="Distance vs. Fare Amount",
         xaxis_title="Distance (km)",
-        yaxis_title="Fare Amount ($)",
-        template="plotly_white"
+        yaxis_title="Fare Amount ($)"
     )
 
     # Create the figure for the second plot (Trip Duration vs Fare)
@@ -148,7 +147,6 @@ def plot_regression(model, df):
         title="Trip Duration vs. Fare Amount",
         xaxis_title="Trip Duration (min)",
         yaxis_title="Fare Amount ($)",
-        template="plotly_white"
     )
 
     # Create two columns in Streamlit
@@ -221,7 +219,6 @@ def plot_all_vars(model, df):
         title="Feature Contribution to Predicted Fare",
         xaxis_title="Features",
         yaxis_title="Average Contribution to Fare ($)",
-        template="plotly_white"
     )
 
     # Create two columns in Streamlit
