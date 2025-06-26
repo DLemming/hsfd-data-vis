@@ -543,3 +543,75 @@ def plot_direction_rose(df):
     ax.set_theta_direction(-1)       # Uhrzeigersinn
     ax.set_title(f"🧭 Fahrtrichtung um {selected_hour}:00 Uhr", va='bottom')
     st.pyplot(fig)
+
+def plot_zone_density_heatmap(df):
+    required = {
+        'pickup_latitude', 'pickup_longitude',
+        'dropoff_latitude', 'dropoff_longitude',
+        'tpep_pickup_datetime'
+    }
+
+    if not required.issubset(df.columns):
+        st.error("CSV muss pickup/dropoff Koordinaten und 'tpep_pickup_datetime' enthalten.")
+        return
+
+    st.subheader("🔥 Zonen mit den meisten Fahrten (Heatmap)")
+
+    df = df.copy()
+    df['tpep_pickup_datetime'] = pd.to_datetime(df['tpep_pickup_datetime'], errors='coerce')
+    df = df.dropna(subset=['tpep_pickup_datetime'])
+
+    # Tagesfilter
+    min_date = df['tpep_pickup_datetime'].dt.date.min()
+    max_date = df['tpep_pickup_datetime'].dt.date.max()
+    selected_date = st.slider("Datum auswählen (24h)", min_value=min_date, max_value=max_date, value=min_date)
+
+    start = pd.Timestamp(selected_date)
+    end = start + pd.Timedelta(days=1)
+    df = df[(df['tpep_pickup_datetime'] >= start) & (df['tpep_pickup_datetime'] < end)]
+
+    # Auswahl: Pickup vs Dropoff
+    mode = st.radio("Welche Orte zeigen?", options=["Pickup", "Dropoff"], horizontal=True)
+
+    if mode == "Pickup":
+        df = df[(df['pickup_latitude'] != 0) & (df['pickup_longitude'] != 0)].copy()
+        df['lat'] = df['pickup_latitude'].round(3)
+        df['lon'] = df['pickup_longitude'].round(3)
+    else:
+        df = df[(df['dropoff_latitude'] != 0) & (df['dropoff_longitude'] != 0)].copy()
+        df['lat'] = df['dropoff_latitude'].round(3)
+        df['lon'] = df['dropoff_longitude'].round(3)
+
+    # Zonenhäufigkeit zählen
+    zone_counts = df.groupby(['lat', 'lon']).size().reset_index(name='weight')
+
+    if zone_counts.empty:
+        st.warning("Keine gültigen Zonen gefunden.")
+        return
+
+    center_lat = zone_counts['lat'].mean()
+    center_lon = zone_counts['lon'].mean()
+
+    layer = pdk.Layer(
+        "HeatmapLayer",
+        data=zone_counts,
+        get_position='[lon, lat]',
+        get_weight="weight",
+        radiusPixels=40,
+        intensity=0.7,
+        threshold=0.05
+    )
+
+    view = pdk.ViewState(
+        latitude=center_lat,
+        longitude=center_lon,
+        zoom=11,
+        pitch=40
+    )
+
+    st.pydeck_chart(pdk.Deck(
+        map_style="mapbox://styles/mapbox/dark-v10",
+        initial_view_state=view,
+        layers=[layer],
+        tooltip={"text": "Fahrten: {weight}"}
+    ))

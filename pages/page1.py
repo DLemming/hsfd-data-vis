@@ -5,6 +5,7 @@ from components.geo_visualization import plot_tip_heatmap
 from components.geo_visualization import plot_anomaly_trips
 from components.geo_visualization import  plot_traffic_congestion
 from components.geo_visualization import  plot_direction_rose
+from components.geo_visualization import plot_zone_density_heatmap
 from logic.data_loader import load_taxi_data
 
 df = load_taxi_data()
@@ -22,3 +23,5 @@ plot_anomaly_trips(df)
 plot_traffic_congestion(df)
 
 plot_direction_rose(df)
+
+plot_zone_density_heatmap(df)
