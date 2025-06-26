@@ -36,7 +36,6 @@ def plot_geo_visualization(df):
     layers = []
 
     if show_all:
-        # Alle Pickups
         df_pickup = df_day.rename(columns={
             'pickup_latitude': 'lat',
             'pickup_longitude': 'lon'
@@ -47,26 +46,41 @@ def plot_geo_visualization(df):
             'dropoff_longitude': 'lon'
         })[['lat', 'lon']]
 
-        layers.append(pdk.Layer(
-            "ScatterplotLayer",
-            data=df_pickup,
-            get_position='[lon, lat]',
-            get_fill_color='[0, 102, 255, 160]',
-            get_radius=10
-        ))
+        use_heatmap = st.checkbox("Heatmap anzeigen", value=False)
 
-        layers.append(pdk.Layer(
-            "ScatterplotLayer",
-            data=df_dropoff,
-            get_position='[lon, lat]',
-            get_fill_color='[255, 0, 0, 160]',
-            get_radius=10
-        ))
+        if use_heatmap:
+            df_all = pd.concat([df_pickup, df_dropoff])
+            layers.append(pdk.Layer(
+                "HeatmapLayer",
+                data=df_all,
+                get_position='[lon, lat]',
+                aggregation='"MEAN"',
+                get_weight=1,
+                radiusPixels=15,
+                intensity=0.4,
+                threshold=0.03
+)
+)
+        else:
+            layers.append(pdk.Layer(
+                "ScatterplotLayer",
+                data=df_pickup,
+                get_position='[lon, lat]',
+                get_fill_color='[0, 102, 255, 160]',
+                get_radius=10
+            ))
+
+            layers.append(pdk.Layer(
+                "ScatterplotLayer",
+                data=df_dropoff,
+                get_position='[lon, lat]',
+                get_fill_color='[255, 0, 0, 160]',
+                get_radius=10
+            ))
 
         center_lat = pd.concat([df_pickup['lat'], df_dropoff['lat']]).mean()
         center_lon = pd.concat([df_pickup['lon'], df_dropoff['lon']]).mean()
     else:
-        # Fahrt-Auswahl
         trip_idx = st.selectbox(
             "Fahrt auswählen (Pickup → Dropoff)",
             options=df_day.index,
@@ -122,5 +136,3 @@ def plot_geo_visualization(df):
         ),
         layers=layers
     ))
-
-    
