@@ -236,3 +236,81 @@ def plot_trip_animation(df):
         if st.session_state.current_time > max_time:
             st.session_state.current_time = 0
         st.rerun() 
+import streamlit as st
+import pandas as pd
+import pydeck as pdk
+
+def plot_tip_heatmap(df):
+    required = {
+        'pickup_longitude', 'pickup_latitude',
+        'dropoff_longitude', 'dropoff_latitude',
+        'tip_amount'
+    }
+
+    if not required.issubset(df.columns):
+        st.error("CSV muss 'pickup/dropoff_longitude', 'pickup/dropoff_latitude' und 'tip_amount' enthalten.")
+        return
+
+    st.subheader("💵 Trinkgeld-Heatmap")
+
+    # Auswahl: Pickup oder Dropoff
+    location_type = st.radio(
+        "Wähle Standortbasis für Heatmap:",
+        options=["Pickup", "Dropoff"],
+        index=0
+    )
+
+    # Optional: Normierung
+    normalize = st.checkbox("Normieren nach Fahrtpreis (Tip %)", value=False)
+
+    if normalize and 'fare_amount' in df.columns:
+        df = df[df['fare_amount'] > 0]
+        df['tip_ratio'] = df['tip_amount'] / df['fare_amount']
+        df = df[df['tip_ratio'] <= 1.0]  # unrealistische Ausreißer filtern
+        df['weight'] = df['tip_ratio']
+    else:
+        df = df[df['tip_amount'] >= 0]
+        df['weight'] = df['tip_amount']
+
+    # Koordinaten auswählen
+    if location_type == "Pickup":
+        df = df[
+            (df['pickup_longitude'] != 0) & (df['pickup_latitude'] != 0)
+        ].copy()
+        df['lon'] = df['pickup_longitude']
+        df['lat'] = df['pickup_latitude']
+    else:
+        df = df[
+            (df['dropoff_longitude'] != 0) & (df['dropoff_latitude'] != 0)
+        ].copy()
+        df['lon'] = df['dropoff_longitude']
+        df['lat'] = df['dropoff_latitude']
+
+    # Zentrum bestimmen
+    center_lat = df['lat'].mean()
+    center_lon = df['lon'].mean()
+
+    # HeatmapLayer bauen
+    layer = pdk.Layer(
+        "HeatmapLayer",
+        data=df,
+        get_position='[lon, lat]',
+        get_weight="weight",
+        radiusPixels=40,
+        intensity=0.6,
+        threshold=0.1
+    )
+
+    view = pdk.ViewState(
+        latitude=center_lat,
+        longitude=center_lon,
+        zoom=11,
+        pitch=40
+    )
+
+    st.pydeck_chart(pdk.Deck(
+        map_style="mapbox://styles/mapbox/dark-v10",
+        initial_view_state=view,
+        layers=[layer],
+        tooltip={"text": "Trinkgeld"}
+    ))
