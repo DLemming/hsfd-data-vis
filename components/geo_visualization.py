@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
+import numpy
+import time
 
 def plot_geo_visualization(df):
     required = {
@@ -136,3 +138,101 @@ def plot_geo_visualization(df):
         ),
         layers=layers
     ))
+
+def plot_trip_animation(df):
+    required = {
+        'pickup_longitude', 'pickup_latitude',
+        'dropoff_longitude', 'dropoff_latitude',
+        'tpep_pickup_datetime', 'tpep_dropoff_datetime'
+    }
+
+    if not required.issubset(df.columns):
+        st.error("CSV muss folgende Spalten enthalten: pickup/dropoff Koordinaten + Zeiten.")
+        return
+
+    df['tpep_pickup_datetime'] = pd.to_datetime(df['tpep_pickup_datetime'], errors='coerce')
+    df['tpep_dropoff_datetime'] = pd.to_datetime(df['tpep_dropoff_datetime'], errors='coerce')
+    df = df.dropna(subset=['tpep_pickup_datetime', 'tpep_dropoff_datetime'])
+
+    df['date'] = df['tpep_pickup_datetime'].dt.date
+    unique_dates = sorted(df['date'].unique())
+    selected_date = st.selectbox("Datum auswählen", unique_dates)
+
+    df_day = df[df['date'] == selected_date].copy()
+    df_day = df_day[
+        (df_day['pickup_latitude'] != 0) &
+        (df_day['pickup_longitude'] != 0) &
+        (df_day['dropoff_latitude'] != 0) &
+        (df_day['dropoff_longitude'] != 0)
+    ]
+
+    day_start = pd.Timestamp(f"{selected_date}")
+    df_day['start_ts'] = (df_day['tpep_pickup_datetime'] - day_start).dt.total_seconds()
+    df_day['end_ts'] = (df_day['tpep_dropoff_datetime'] - day_start).dt.total_seconds()
+
+    df_day['path'] = df_day.apply(lambda row: [
+        [row['pickup_longitude'], row['pickup_latitude']],
+        [row['dropoff_longitude'], row['dropoff_latitude']]
+    ], axis=1)
+    df_day['timestamps'] = df_day.apply(lambda row: [row['start_ts'], row['end_ts']], axis=1)
+
+    df_viz = df_day[['path', 'timestamps']]
+
+    # Session-State initialisieren
+    if 'current_time' not in st.session_state:
+        st.session_state.current_time = 0
+    if 'playing' not in st.session_state:
+        st.session_state.playing = False
+
+    max_time = int(df_day['end_ts'].max())
+
+    # Layout: Spalten für Steuerung
+    col1, col2 = st.columns([1, 5])
+    if col1.button("▶️ Start" if not st.session_state.playing else "⏸️ Pause"):
+        st.session_state.playing = not st.session_state.playing
+
+    # Slider manuell steuerbar, aber auch während Autoplay sichtbar
+    st.session_state.current_time = col2.slider(
+        "Aktuelle Zeit (Sekunden seit Mitternacht)", 
+        min_value=0, 
+        max_value=max_time, 
+        value=st.session_state.current_time,
+        step=60
+    )
+
+    # Kartenmittelpunkt berechnen
+    center_lat = df_day['pickup_latitude'].mean()
+    center_lon = df_day['pickup_longitude'].mean()
+
+    trips_layer = pdk.Layer(
+        "TripsLayer",
+        data=df_viz,
+        get_path="path",
+        get_timestamps="timestamps",
+        get_color=[253, 128, 93],
+        opacity=0.8,
+        width_min_pixels=2,
+        rounded=True,
+        trail_length=600,
+        current_time=st.session_state.current_time
+    )
+
+    # Karte rendern
+    st.pydeck_chart(pdk.Deck(
+        map_style='mapbox://styles/mapbox/dark-v10',
+        layers=[trips_layer],
+        initial_view_state=pdk.ViewState(
+            latitude=center_lat,
+            longitude=center_lon,
+            zoom=12,
+            pitch=45
+        )
+    ))
+
+    # Autoplay-Loop
+    if st.session_state.playing:
+        time.sleep(0.1)  # leichtes Delay für realistische Wiedergabe
+        st.session_state.current_time += 60  # 60 Sekunden pro Frame
+        if st.session_state.current_time > max_time:
+            st.session_state.current_time = 0
+        st.rerun() 
