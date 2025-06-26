@@ -5,6 +5,7 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 from matplotlib.projections.polar import PolarAxes
+from sklearn.cluster import KMeans
 
 def plot_geo_visualization(df):
     required = {
@@ -544,6 +545,7 @@ def plot_direction_rose(df):
     ax.set_title(f"🧭 Fahrtrichtung um {selected_hour}:00 Uhr", va='bottom')
     st.pyplot(fig)
 
+
 def plot_zone_density_heatmap(df):
     required = {
         'pickup_latitude', 'pickup_longitude',
@@ -555,7 +557,7 @@ def plot_zone_density_heatmap(df):
         st.error("CSV muss pickup/dropoff Koordinaten und 'tpep_pickup_datetime' enthalten.")
         return
 
-    st.subheader("🔥 Zonen mit den meisten Fahrten (Heatmap)")
+    st.subheader("🔥 Zonen mit den meisten Fahrten (Heatmap, geclustert)")
 
     df = df.copy()
     df['tpep_pickup_datetime'] = pd.to_datetime(df['tpep_pickup_datetime'], errors='coerce')
@@ -564,7 +566,11 @@ def plot_zone_density_heatmap(df):
     # Tagesfilter
     min_date = df['tpep_pickup_datetime'].dt.date.min()
     max_date = df['tpep_pickup_datetime'].dt.date.max()
-    selected_date = st.slider("Datum auswählen (24h)", min_value=min_date, max_value=max_date, value=min_date)
+    if min_date == max_date:
+        selected_date = min_date
+        st.info(f"Nur ein Datum vorhanden: {min_date}")
+    else:
+        selected_date = st.slider("Datum auswählen (24h)", min_value=min_date, max_value=max_date, value=min_date)
 
     start = pd.Timestamp(selected_date)
     end = start + pd.Timedelta(days=1)
@@ -574,20 +580,32 @@ def plot_zone_density_heatmap(df):
     mode = st.radio("Welche Orte zeigen?", options=["Pickup", "Dropoff"], horizontal=True)
 
     if mode == "Pickup":
-        df = df[(df['pickup_latitude'] != 0) & (df['pickup_longitude'] != 0)].copy()
-        df['lat'] = df['pickup_latitude'].round(3)
-        df['lon'] = df['pickup_longitude'].round(3)
+        coords = df[['pickup_latitude', 'pickup_longitude']].dropna()
+        coords.columns = ['lat', 'lon']
     else:
-        df = df[(df['dropoff_latitude'] != 0) & (df['dropoff_longitude'] != 0)].copy()
-        df['lat'] = df['dropoff_latitude'].round(3)
-        df['lon'] = df['dropoff_longitude'].round(3)
+        coords = df[['dropoff_latitude', 'dropoff_longitude']].dropna()
+        coords.columns = ['lat', 'lon']
 
-    # Zonenhäufigkeit zählen
-    zone_counts = df.groupby(['lat', 'lon']).size().reset_index(name='weight')
+    # Nur gültige Koordinaten
+    coords = coords[(coords['lat'] != 0) & (coords['lon'] != 0)]
 
-    if zone_counts.empty:
-        st.warning("Keine gültigen Zonen gefunden.")
+    if coords.empty:
+        st.warning("Keine gültigen Koordinaten.")
         return
+
+    # Slider für Anzahl Cluster
+    max_possible_clusters = min(300, len(coords))  # Safety limit
+    n_clusters = st.slider("Anzahl Cluster", min_value=5, max_value=max_possible_clusters, value=100)
+
+    # Clustering mit KMeans
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init='auto')
+    coords['cluster'] = kmeans.fit_predict(coords[['lat', 'lon']])
+    coords['cluster_lat'] = kmeans.cluster_centers_[coords['cluster'], 0]
+    coords['cluster_lon'] = kmeans.cluster_centers_[coords['cluster'], 1]
+
+    # Cluster-Zentren und Häufigkeit
+    zone_counts = coords.groupby(['cluster_lat', 'cluster_lon']).size().reset_index(name='weight')
+    zone_counts.rename(columns={'cluster_lat': 'lat', 'cluster_lon': 'lon'}, inplace=True)
 
     center_lat = zone_counts['lat'].mean()
     center_lon = zone_counts['lon'].mean()
@@ -598,7 +616,7 @@ def plot_zone_density_heatmap(df):
         get_position='[lon, lat]',
         get_weight="weight",
         radiusPixels=40,
-        intensity=0.7,
+        intensity=0.6,
         threshold=0.05
     )
 
