@@ -4,23 +4,19 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+
 def haversine(lat1, lon1, lat2, lon2):
-    # Earth radius in kilometers
-    R = 6371.0
+    """Calculate the Haversine distance between two points."""
+    R = 6371  # Radius of Earth in kilometers
+    phi1 = np.radians(lat1)
+    phi2 = np.radians(lat2)
+    delta_phi = np.radians(lat2 - lat1)
+    delta_lambda = np.radians(lon2 - lon1)
 
-    lat1 = np.radians(lat1)
-    lon1 = np.radians(lon1)
-    lat2 = np.radians(lat2)
-    lon2 = np.radians(lon2)
+    a = np.sin(delta_phi / 2)**2 + np.cos(phi1) * np.cos(phi2) * np.sin(delta_lambda / 2)**2
+    c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
 
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-
-    a = np.sin(dlat / 2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2)**2
-    c = 2 * np.arcsin(np.sqrt(a))
-
-    distance = R * c
-    return distance
+    return R * c  # Return distance in kilometers
 
 @st.cache_data
 def fit_regression_model(df):
@@ -53,3 +49,17 @@ def fit_regression_model(df):
     model = LinearRegression()
     model.fit(X, y)
     return model, df
+
+
+def get_average_trip_duration(df, distance, km_thresh=1.0):
+    """
+    Given pickup and dropoff coordinates, find similar trips based on Haversine distance and return the average trip duration.
+    """
+    # Filter trips that are within the threshold distance of the selected trip's distance
+    similar_trips = df[np.abs(df['distance'] - distance) <= km_thresh]
+
+    # If there are similar trips, return the average trip duration
+    if not similar_trips.empty:
+        return similar_trips['trip_duration'].mean()
+    else:
+        return 30  # Default value if no similar trips found
