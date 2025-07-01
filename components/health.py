@@ -3,20 +3,11 @@ import plotly.graph_objects as go
 import pandas as pd
 
 from logic.health import compute_health
-
-ALLOWED_COLS = [
-    "VendorID",
-    "tpep_pickup_datetime", "tpep_dropoff_datetime",
-    "passenger_count",
-    "trip_distance",
-    "pickup_longitude", "pickup_latitude",
-    "dropoff_longitude","dropoff_latitude",
-    "payment_type","fare_amount","tip_amount","tolls_amount","improvement_surcharge","total_amount"
-]
+from data.constants import ALLOWED_SELECTION_HEALTH
 
 
 def render_health_component(df: pd.DataFrame):
-    filtered_cols = [col for col in ALLOWED_COLS if col in df.columns]
+    filtered_cols = [col for col in ALLOWED_SELECTION_HEALTH if col in df.columns]
 
     with st.expander("Select columns for health check"):
         selected_cols = st.multiselect(

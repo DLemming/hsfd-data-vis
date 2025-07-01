@@ -2,7 +2,7 @@ import streamlit as st
 
 from logic.data_loader import load_taxi_data
 
-from components.passenger_count import show_passenger_count_bar_chart
+from components.sidebar import sidebar
 from components.health import render_health_component
 from components.univariate import (
     render_bar_chart,
@@ -11,10 +11,11 @@ from components.univariate import (
     render_pie_chart
 )
 
-st.set_page_config(page_title="NYC Taxi Trips", page_icon="🚖", layout="wide")
-#st.title('NYC Yellow Taxi Trip Data')
 
-df = load_taxi_data()
+st.set_page_config(page_title="NYC Taxi Trips", page_icon="🚖", layout="wide")
+
+filters = sidebar()
+df = load_taxi_data(filters["use_full_data"], filters["healthy_only"])
 
 # Top row
 col1, col2 = st.columns([1,2])
@@ -36,5 +37,3 @@ with col4:
 with col5:
     st.markdown("### Box Plot")
     render_boxplot(df)
-
-#show_passenger_count_bar_chart(df)

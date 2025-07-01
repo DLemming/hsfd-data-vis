@@ -1,6 +1,7 @@
 import streamlit as st
-from logic.data_loader import load_taxi_data, filter_valid
+from logic.data_loader import load_taxi_data
 from logic.regression import fit_regression_model
+from components.sidebar import sidebar
 from components.regression import (
     show_regression_inputs,
     plot_regression,
@@ -8,16 +9,15 @@ from components.regression import (
     plot_3d_regression_surface
 )
 
+
 st.set_page_config(layout="wide")
 
-df = load_taxi_data()
-df = filter_valid(df)
-
-# Show simple pickup map
+filters = sidebar()
+df = load_taxi_data(filters["use_full_data"], filters["healthy_only"])
 model, df = fit_regression_model(df)
 
-show_regression_inputs(model, df)
 
+show_regression_inputs(model, df)
 
 st.subheader("Regression Model Analysis")
 plot_regression(model, df)
