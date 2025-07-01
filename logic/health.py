@@ -1,26 +1,14 @@
+import streamlit as st
 import pandas as pd
+from data.constants import CUSTOM_CHECKS
 
-CUSTOM_CHECKS = {
-    "passenger_count": lambda s: s.notnull() & (s != 0),
-    "trip_distance": lambda s: s.notnull() & (s >= 0),
-    "pickup_longitude": lambda s: s.notnull() & (s > -79) & (s < -71),
-    "pickup_latitude": lambda s: s.notnull() & (s > 40) & (s < 46),
-    "dropoff_longitude": lambda s: s.notnull() & (s > -79) & (s < -71),
-    "dropoff_latitude": lambda s: s.notnull() & (s > 40) & (s < 46),
-    "fare_amount": lambda s: s.notnull() & (s >= 0),
-    "mta_tax": lambda s: s.notnull() & (s >= 0),
-    "tip_amount": lambda s: s.notnull() & (s >= 0),
-    "tolls_amount": lambda s: s.notnull() & (s >= 0),
-    "improvement_surcharge": lambda s: s.notnull() & (s >= 0),
-    "total_amount": lambda s: s.notnull() & (s >= 0),
-}
-
-def compute_health(
-    df: pd.DataFrame,
-    columns: list[str],
-) -> dict:
+@st.cache_data
+def compute_health(df: pd.DataFrame, columns: list[str]=None) -> dict:
     total = len(df)
     checks = []
+
+    if columns is None:
+        columns = df.columns
 
     for col in columns:
         if CUSTOM_CHECKS and col in CUSTOM_CHECKS:
@@ -46,3 +34,7 @@ def compute_health(
         "healthy_percent": healthy_percent,
         "total": total
     }
+
+def get_healthy_mask(df: pd.DataFrame) -> pd.Series:
+    result = compute_health(df)
+    return result["healthy_mask"]

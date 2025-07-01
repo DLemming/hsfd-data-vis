@@ -1,22 +1,24 @@
 import pandas as pd
 import streamlit as st
+from logic.health import get_healthy_mask
+from data.constants import SAMPLE_SIZE
+
 
 @st.cache_data
-def load_taxi_data():
-    """Lädt die Taxi-Daten aus einer CSV-Datei und gibt die ersten nrows zurück."""
-    return pd.read_csv(r"data/data-small.csv")
+def load_taxi_data(use_full_data: bool, healthy_only: bool):
+    """
+    Loads the taxi data from a csv file.
+    Optionally filters down to a subset and/or selects only healthy data.
+    """
 
-@st.cache_data
-def filter_valid(df: pd.DataFrame):
-    """Entfernt alle korrupten Datenpunkte"""
+    df = pd.read_csv("data/data-small.csv")
     df = df.drop(columns=['RatecodeID'])
-    df = df.dropna()
-    df = df[
-        df['pickup_latitude'].between(40.5, 41.0) &
-        df['pickup_longitude'].between(-74.3, -73.6) &
-        df['dropoff_latitude'].between(40.5, 41.0) &
-        df['dropoff_longitude'].between(-74.3, -73.6)
-    ]
-    df = df[df['passenger_count'] > 0]
-    df = df[df['fare_amount'] > 0]
+
+    if not use_full_data:
+        df = df.sample(n=SAMPLE_SIZE, random_state=42)
+
+    if healthy_only:
+        mask = get_healthy_mask(df)
+        df = df[mask]
+
     return df
