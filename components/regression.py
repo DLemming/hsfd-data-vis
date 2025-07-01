@@ -1,31 +1,50 @@
 import streamlit as st
 import pydeck as pdk
 import numpy as np
-from logic.regression import haversine
 import plotly.graph_objects as go
 import plotly.express as px
+
+from logic.regression import (
+    haversine,
+    get_average_trip_duration
+)
+from data.constants import NYC_LOCATIONS
 
 
 def show_regression_inputs(model, df):
     st.subheader("Predict Fare Amounts")
 
-    # Default values
-    pickup_lat = 40.65
-    pickup_lon = -73.78
-    dropoff_lat = 40.75
-    dropoff_lon = -73.99
-
     # Create layout: map on left, sliders on right
     col1, col2 = st.columns([3, 1])
 
     with col2:
-        st.markdown("**Pickup location**")
-        pickup_lat = st.slider("Pickup Latitude", 40.5, 41.0, pickup_lat, 0.0001)
-        pickup_lon = st.slider("Pickup Longitude", -74.3, -73.6, pickup_lon, 0.0001)
+        # All available location names
+        location_names = list(NYC_LOCATIONS.keys())
 
+        # Pickup dropdown
+        st.markdown("**Pickup location**")
+        pickup_location = st.selectbox("Select pickup location ", location_names, index=0)
+        st.markdown("</br>", unsafe_allow_html=True)
+
+        # Dropoff dropdown with pickup excluded
+        dropoff_options = [loc for loc in location_names if loc != pickup_location]
         st.markdown("**Dropoff location**")
-        dropoff_lat = st.slider("Dropoff Latitude", 40.5, 41.0, dropoff_lat, 0.0001)
-        dropoff_lon = st.slider("Dropoff Longitude", -74.3, -73.6, dropoff_lon, 0.0001)
+        dropoff_location = st.selectbox("Select dropoff location (green)", dropoff_options, index=0)
+        st.markdown("</br></br></br>", unsafe_allow_html=True)
+
+    # Get coordinates
+    pickup_lat, pickup_lon = NYC_LOCATIONS[pickup_location]
+    dropoff_lat, dropoff_lon = NYC_LOCATIONS[dropoff_location]
+
+    # Calculate distance (Haversine or any other method)
+    distance = haversine(pickup_lat, pickup_lon, dropoff_lat, dropoff_lon)
+
+    # Get average trip duration based on similar trips
+    avg_trip_duration = get_average_trip_duration(df, distance)
+
+    with col2:
+        # Set the average trip duration as the default in the slider
+        trip_duration = st.slider("Trip Duration (minutes)", 1, 120, int(avg_trip_duration))
 
     # Map layer
     layers = [
@@ -63,20 +82,16 @@ def show_regression_inputs(model, df):
 
     with col1:
         st.pydeck_chart(pdk.Deck(
-
             initial_view_state=pdk.ViewState(
-                latitude=40.73,
-                longitude=-73.93,
-                zoom=10,
+                latitude=(pickup_lat + dropoff_lat) / 2,
+                longitude=(pickup_lon + dropoff_lon) / 2,
+                zoom=11,
                 pitch=50,
             ),
             layers=layers
         ))
 
-    trip_duration = st.slider("Trip Duration", 1, 120, 60)
-
     # Predict fare
-    distance = haversine(pickup_lat, pickup_lon, dropoff_lat, dropoff_lon)
     X = np.array([[distance, trip_duration]])
     fare_pred = model.predict(X)[0]
 
