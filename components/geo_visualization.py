@@ -593,7 +593,7 @@ def plot_zone_density_heatmap(df):
         return
 
     # Slider für Anzahl Cluster
-    max_possible_clusters = min(10, len(coords))  # Safety limit
+    max_possible_clusters = min(300, len(coords))  # Safety limit
     n_clusters = st.slider("Anzahl Cluster", min_value=5, max_value=max_possible_clusters, value=100)
 
     # Clustering mit KMeans
