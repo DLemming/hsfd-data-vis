@@ -21,7 +21,7 @@ source .venv/bin/activate
 
 Make sure you're in the project root. Run the Streamlit app with:
 ```sh
-streamlit run 🏠_Home.py
+streamlit run 🏠_Overview.py
 ```
 
 ## Preview
