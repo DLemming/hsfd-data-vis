@@ -10,6 +10,10 @@ from components.univariate import (
     render_histogram,
     render_pie_chart
 )
+from components.bivariate import (
+    plot_corr_heatmap,
+    plot_bivariate_scatter
+)
 
 
 st.set_page_config(page_title="NYC Taxi Trips", page_icon="🚖", layout="wide")
@@ -37,3 +41,19 @@ with col4:
 with col5:
     st.markdown("### Box Plot")
     render_boxplot(df)
+
+
+
+st.markdown("---")
+st.title("Bivariate Analysis")
+
+col6, col7 = st.columns(2)
+
+with col6:
+    st.subheader("Correlation Heatmap")
+    st.markdown("<br><br><br>", unsafe_allow_html=True)
+    plot_corr_heatmap(df)
+with col7:
+    st.subheader("Scatterplot")
+    plot_bivariate_scatter(df)
+
