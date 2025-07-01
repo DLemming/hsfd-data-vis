@@ -44,7 +44,6 @@ def fit_regression_model(df):
         (df['trip_duration'] > 0) &
         (df['trip_duration'] < 120)
     ]
-    print(f"Rows after filtering: {len(df)}")
 
     # Prepare data
     X = df[['distance', 'trip_duration']].to_numpy()
