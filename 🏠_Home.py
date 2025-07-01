@@ -36,5 +36,3 @@ with col4:
 with col5:
     st.markdown("### Box Plot")
     render_boxplot(df)
-
-#show_passenger_count_bar_chart(df)
