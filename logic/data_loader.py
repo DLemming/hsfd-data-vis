@@ -11,8 +11,11 @@ def load_taxi_data(use_full_data: bool, healthy_only: bool):
     Optionally filters down to a subset and/or selects only healthy data.
     """
 
-    df = pd.read_csv("data/data-small.csv")
-    df = df.drop(columns=['RatecodeID'])
+    df = pd.read_csv(
+        "data/data-small.csv",
+        parse_dates=["tpep_pickup_datetime", "tpep_dropoff_datetime"]
+    )
+    df = df.drop(columns=["RatecodeID", "store_and_fwd_flag"])
 
     if not use_full_data:
         df = df.sample(n=SAMPLE_SIZE, random_state=42)

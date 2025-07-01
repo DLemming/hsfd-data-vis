@@ -1,32 +1,38 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from logic.univariate import get_metrical_columns, get_categorical_columns
+from logic.univariate import (
+    get_metrical_columns,
+    get_categorical_columns,
+    get_datetime_columns
+)
 
 # TODO: Select meaningful columns, not by index but name
 
 def render_histogram(df: pd.DataFrame):
-    numeric = get_metrical_columns(df)
-    if numeric:
-        col = st.selectbox("Histogram Column", numeric, label_visibility="collapsed")
+    cols = get_metrical_columns(df)
+
+    if cols:
+        cols.extend(get_datetime_columns(df))
+        col = st.selectbox("Histogram Column", cols, label_visibility="collapsed")
         __histogram(df, col)
 
 def render_bar_chart(df: pd.DataFrame):
     categorical = get_categorical_columns(df)
     if categorical:
-        col = st.selectbox("Bar Chart Column", categorical, label_visibility="collapsed", index=0)
+        col = st.selectbox("Bar Chart Column", categorical, label_visibility="collapsed", index=1)
         __bar_chart(df, col)
 
 def render_pie_chart(df: pd.DataFrame):
     categorical = get_categorical_columns(df)
     if categorical:
-        col = st.selectbox("Pie Chart Column", categorical, label_visibility="collapsed", index=0)
+        col = st.selectbox("Pie Chart Column", categorical, label_visibility="collapsed", index=3)
         __pie_chart(df, col)
 
 def render_boxplot(df: pd.DataFrame):
     numeric = get_metrical_columns(df)
     if numeric:
-        col = st.selectbox("Boxplot Column", numeric, label_visibility="collapsed", index=0)
+        col = st.selectbox("Boxplot Column", numeric, label_visibility="collapsed", index=5)
         __boxplot(df, col)
 
 

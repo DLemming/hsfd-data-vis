@@ -1,40 +1,33 @@
 import pandas as pd
 import streamlit as st
+from data.constants import UNIQUE_THRESH
 
 
-def _looks_like_timestamp(series: pd.Series, sample_size: int = 20, threshold: float = 0.9) -> bool:
-    if not pd.api.types.is_object_dtype(series) and not pd.api.types.is_string_dtype(series):
-        return False
+def get_datetime_columns(df: pd.DataFrame):
+    """Return columns that are datetime like."""
+    return [col for col in df.columns if pd.api.types.is_datetime64_any_dtype(df[col])]
 
-    sample = series.dropna().sample(n=min(sample_size, len(series)), random_state=42)
-
-    parsed = pd.to_datetime(sample, errors="coerce", utc=True)
-    success_rate = parsed.notna().mean()
-    
-    return success_rate >= threshold
-
-@st.cache_data
-def get_metrical_columns(df: pd.DataFrame, min_unique: int = 20) -> list[str]:
-    """Return columns that are numeric or datetime-like and have enough unique values."""
+def get_metrical_columns(df: pd.DataFrame) -> list[str]:
+    """Return columns that are numeric and have enough unique values."""
     result = []
     for col in df.columns:
         series = df[col]
         if (
-            pd.api.types.is_numeric_dtype(series) or _looks_like_timestamp(series)
-        ) and series.nunique(dropna=True) >= min_unique:
+            pd.api.types.is_numeric_dtype(series)
+            and series.nunique(dropna=True) >= UNIQUE_THRESH
+        ):
             result.append(col)
     return result
 
-@st.cache_data
-def get_categorical_columns(df: pd.DataFrame, max_unique: int = 20) -> list[str]:
+def get_categorical_columns(df: pd.DataFrame) -> list[str]:
     """Return columns that are object or low-cardinality numeric, excluding datetime-like."""
     result = []
     for col in df.columns:
         series = df[col]
-        if _looks_like_timestamp(series):
+        if pd.api.types.is_datetime64_any_dtype(series):
             continue
         
         unique_count = series.nunique(dropna=True)
-        if series.dtype == "object" or (pd.api.types.is_numeric_dtype(series) and unique_count < max_unique):
+        if series.dtype == "object" or (pd.api.types.is_numeric_dtype(series) and unique_count < UNIQUE_THRESH):
             result.append(col)
     return result
