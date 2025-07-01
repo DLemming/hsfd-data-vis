@@ -47,3 +47,4 @@ CUSTOM_CHECKS = {
     "total_amount": lambda s: s.notnull() & (s > 0),
 }
 
+UNIQUE_THRESH = 20
