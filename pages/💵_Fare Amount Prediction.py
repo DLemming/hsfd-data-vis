@@ -12,8 +12,7 @@ from components.regression import (
 
 st.set_page_config(layout="wide")
 
-filters = sidebar()
-df = load_taxi_data(filters["use_full_data"], filters["healthy_only"])
+df = load_taxi_data(sidebar())
 model, df = fit_regression_model(df)
 
 

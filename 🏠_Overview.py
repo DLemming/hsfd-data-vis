@@ -18,8 +18,7 @@ from components.bivariate import (
 
 st.set_page_config(page_title="NYC Taxi Trips", page_icon="🚖", layout="wide")
 
-filters = sidebar()
-df = load_taxi_data(filters["use_full_data"], filters["healthy_only"])
+df = load_taxi_data(sidebar())
 
 # Top row
 col1, col2 = st.columns([1,2])

@@ -2,9 +2,11 @@
 # ----------- Sidebar -------------
 # ---------------------------------
 
-SAMPLE_SIZE = 1_000
+MIN_SAMPLES = 1_000
+MAX_SAMPLES = 9_900
+DEFAULT_SAMPLES = 1_000
 HEALTHY_ONLY = True
-FULL_DATASET = False
+USE_SUBSET = True
 
 
 # ---------------------------------

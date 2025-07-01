@@ -9,8 +9,7 @@ from components.geo_visualization import plot_zone_density_heatmap
 from components.sidebar import sidebar
 from logic.data_loader import load_taxi_data
 
-filters = sidebar()
-df = load_taxi_data(filters["use_full_data"], filters["healthy_only"])
+df = load_taxi_data(sidebar())
 
 st.title('Geo visualization over time')
 
