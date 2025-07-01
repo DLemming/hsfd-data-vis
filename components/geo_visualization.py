@@ -632,3 +632,76 @@ def plot_zone_density_heatmap(df):
         layers=[layer],
         tooltip={"text": "Fahrten: {weight}"}
     ))
+
+def plot_taxi_sinkholes(df):
+    required = {
+        'pickup_latitude', 'pickup_longitude',
+        'dropoff_latitude', 'dropoff_longitude'
+    }
+
+    if not required.issubset(df.columns):
+        st.error("CSV muss pickup/dropoff Koordinaten enthalten.")
+        return
+
+    st.subheader("🕳️ Taxi Sinkholes – Netto-Gewinn/Verlust nach Region")
+
+    df = df.copy()
+    df = df[
+        (df['pickup_latitude'] != 0) & (df['pickup_longitude'] != 0) &
+        (df['dropoff_latitude'] != 0) & (df['dropoff_longitude'] != 0)
+    ]
+
+    # Runden auf Gitterzellen
+    precision = 3  # ca. ~100m Raster
+    df['pickup_lat'] = df['pickup_latitude'].round(precision)
+    df['pickup_lon'] = df['pickup_longitude'].round(precision)
+    df['dropoff_lat'] = df['dropoff_latitude'].round(precision)
+    df['dropoff_lon'] = df['dropoff_longitude'].round(precision)
+
+    # Zählung pro Zelle
+    pickup_counts = df.groupby(['pickup_lat', 'pickup_lon']).size().reset_index(name='pickups')
+    dropoff_counts = df.groupby(['dropoff_lat', 'dropoff_lon']).size().reset_index(name='dropoffs')
+
+    pickup_counts = pickup_counts.rename(columns={'pickup_lat': 'lat', 'pickup_lon': 'lon'})
+    dropoff_counts = dropoff_counts.rename(columns={'dropoff_lat': 'lat', 'dropoff_lon': 'lon'})
+
+    # Merge pickup und dropoff counts
+    merged = pd.merge(dropoff_counts, pickup_counts, on=['lat', 'lon'], how='outer').fillna(0)
+    merged['net_flow'] = merged['dropoffs'] - merged['pickups']  # positive = Quelle, negativ = Senke
+
+    if merged.empty:
+        st.warning("Keine gültigen Daten nach Gruppierung.")
+        return
+
+    center_lat = merged['lat'].mean()
+    center_lon = merged['lon'].mean()
+
+    # Color Mapping: grün (Quelle) → rot (Senke)
+    max_abs_flow = np.abs(merged['net_flow']).max()
+    merged['color'] = merged['net_flow'].apply(lambda x: [0, 255, 0, 180] if x > 0 else [255, 0, 0, 180])
+
+    layer = pdk.Layer(
+        "ColumnLayer",
+        data=merged,
+        get_position='[lon, lat]',
+        get_elevation='net_flow',
+        elevation_scale=10,
+        radius=70,
+        get_fill_color='color',
+        pickable=True,
+        auto_highlight=True,
+    )
+
+    view_state = pdk.ViewState(
+        latitude=center_lat,
+        longitude=center_lon,
+        zoom=11,
+        pitch=50
+    )
+
+    st.pydeck_chart(pdk.Deck(
+        map_style="mapbox://styles/mapbox/dark-v10",
+        initial_view_state=view_state,
+        layers=[layer],
+        tooltip={"text": "📍 Netto: {net_flow} (Dropoffs - Pickups)"}
+    ))
