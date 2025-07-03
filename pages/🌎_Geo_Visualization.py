@@ -12,9 +12,8 @@ from components.geo_visualization import (
 from components.sidebar import sidebar
 from logic.data_loader import load_taxi_data
 
-# Sidebar mit Filter
-filters = sidebar()
-df = load_taxi_data(filters["use_full_data"], filters["healthy_only"])
+
+df = load_taxi_data(sidebar())
 
 st.title('🗺️ Geo-Visualisierung NYC Taxi Daten')
 
