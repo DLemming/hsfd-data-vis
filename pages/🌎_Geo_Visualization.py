@@ -62,6 +62,6 @@ elif tab_selection == "📊 Zone Density":
     st.subheader("📊 Heatmap by Taxi Zones")
     plot_zone_density_heatmap(df)
 
-elif tab_selection == "🧪 Test":
-    st.subheader("🧪 Test – Pickup Tower")
+elif tab_selection == "Taxi Sinkholes – Net Gain/Loss by Region":
+    st.subheader("Taxi Sinkholes – Net Gain/Loss by Region")
     plot_taxi_sinkholes(df)
