@@ -12,58 +12,56 @@ from components.geo_visualization import (
 from components.sidebar import sidebar
 from logic.data_loader import load_taxi_data
 
-# Sidebar-Filter laden
+# Load sidebar filters
 df = load_taxi_data(sidebar())
 
-st.title('🗺️ Geo-Visualisierung NYC Taxi Daten')
+st.title('🗺️ Geo Visualization of NYC Taxi Data')
 
 tab_selection = st.radio(
-    "🔍 Wähle eine Visualisierung:",
+    "🔍 Select a visualization:",
     options=[
         "🌍 Geo Map",
-        "🎞️ Fahrt-Animation",
+        "🎞️ Trip Animation",
         "💰 Tip Heatmap",
-        "🚨 Anomalien",
-        "🚦 Verkehr",
-        "🧭 Fahrtrichtung",
-        "📊 Zonen-Dichte",
+        "🚨 Anomalies",
+        "🚦 Traffic",
+        "🧭 Direction",
+        "📊 Zone Density",
         "🧪 Test"
     ],
     key="selected_tab",
     horizontal=True
 )
 
-
-# Entsprechend der Auswahl anzeigen
+# Display according to selected tab
 if tab_selection == "🌍 Geo Map":
-    st.subheader("🌍 Interaktive Geo-Visualisierung")
+    st.subheader("🌍 Interactive Geo Visualization")
     plot_geo_visualization(df)
 
-elif tab_selection == "🎞️ Fahrt-Animation":
-    st.subheader("🎞️ Fahrtverlauf über Zeit")
+elif tab_selection == "🎞️ Trip Animation":
+    st.subheader("🎞️ Trip Progress Over Time")
     plot_trip_animation(df)
 
 elif tab_selection == "💰 Tip Heatmap":
-    st.subheader("💰 Heatmap der Tip-Beträge")
+    st.subheader("💰 Heatmap of Tip Amounts")
     plot_tip_heatmap(df)
 
-elif tab_selection == "🚨 Anomalien":
-    st.subheader("🚨 Auffällige Fahrten")
+elif tab_selection == "🚨 Anomalies":
+    st.subheader("🚨 Suspicious Trips")
     plot_anomaly_trips(df)
 
-elif tab_selection == "🚦 Verkehr":
-    st.subheader("🚦 Verkehrsdichte / Stau")
+elif tab_selection == "🚦 Traffic":
+    st.subheader("🚦 Traffic Density / Congestion")
     plot_traffic_congestion(df)
 
-elif tab_selection == "🧭 Fahrtrichtung":
-    st.subheader("🧭 Richtungsanalyse (Rose Plot)")
+elif tab_selection == "🧭 Direction":
+    st.subheader("🧭 Directional Analysis (Rose Plot)")
     plot_direction_rose(df)
 
-elif tab_selection == "📊 Zonen-Dichte":
-    st.subheader("📊 Heatmap nach Taxi-Zonen")
+elif tab_selection == "📊 Zone Density":
+    st.subheader("📊 Heatmap by Taxi Zones")
     plot_zone_density_heatmap(df)
 
 elif tab_selection == "🧪 Test":
     st.subheader("🧪 Test – Pickup Tower")
-    st.info("Dies ist der Test-Tab. Sollte immer sichtbar sein – unabhängig von der Datenlage.")
     plot_taxi_sinkholes(df)
