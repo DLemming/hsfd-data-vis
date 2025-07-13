@@ -12,7 +12,6 @@ from data.constants import NYC_LOCATIONS
 
 
 def show_regression_inputs(model, df):
-    st.subheader("Predict Fare Amounts")
 
     # Create layout: map on left, sliders on right
     col1, col2 = st.columns([3, 1])
@@ -21,16 +20,15 @@ def show_regression_inputs(model, df):
         # All available location names
         location_names = list(NYC_LOCATIONS.keys())
 
+        st.markdown("**Choose Route**")
+
         # Pickup dropdown
-        st.markdown("**Pickup location**")
-        pickup_location = st.selectbox("Select pickup location ", location_names, index=0)
-        st.markdown("</br>", unsafe_allow_html=True)
+        pickup_location = st.selectbox("Pickup (green)", location_names, index=1)
 
         # Dropoff dropdown with pickup excluded
         dropoff_options = [loc for loc in location_names if loc != pickup_location]
-        st.markdown("**Dropoff location**")
-        dropoff_location = st.selectbox("Select dropoff location (green)", dropoff_options, index=0)
-        st.markdown("</br></br></br>", unsafe_allow_html=True)
+        dropoff_location = st.selectbox("Destination (blue)", dropoff_options, index=3)
+        st.markdown("</br>", unsafe_allow_html=True)
 
     # Get coordinates
     pickup_lat, pickup_lon = NYC_LOCATIONS[pickup_location]
@@ -44,7 +42,9 @@ def show_regression_inputs(model, df):
 
     with col2:
         # Set the average trip duration as the default in the slider
-        trip_duration = st.slider("Trip Duration (minutes)", 1, 120, int(avg_trip_duration))
+        st.markdown("**Trip Duration**")
+        trip_duration = st.slider("Select Duration (minutes)", 1, 120, int(avg_trip_duration))
+        st.markdown("</br></br>", unsafe_allow_html=True)
 
     # Map layer
     layers = [
@@ -72,8 +72,8 @@ def show_regression_inputs(model, df):
             }],
             get_source_position="start",
             get_target_position="end",
-            get_source_color=[0, 0, 255, 160],
-            get_target_color=[0, 255, 0, 160],
+            get_source_color=[0, 255, 0, 160],
+            get_target_color=[0, 0, 255, 160],
             width_scale=0.0001,
             width_min_pixels=3,
             width_max_pixels=10,
@@ -95,7 +95,8 @@ def show_regression_inputs(model, df):
     X = np.array([[distance, trip_duration]])
     fare_pred = model.predict(X)[0]
 
-    st.success(f"Predicted fare: ${fare_pred:.2f}")
+    with col2:
+        st.success(f"Predicted fare: ${fare_pred:.2f}")
 
 def plot_regression(model, df):
     # Sample a subset of the data for clearer visualization

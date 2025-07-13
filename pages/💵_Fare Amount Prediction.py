@@ -15,7 +15,7 @@ st.set_page_config(layout="wide")
 df = load_taxi_data(sidebar())
 model, df = fit_regression_model(df)
 
-
+st.header("Fare Amount Prediction")
 show_regression_inputs(model, df)
 
 st.subheader("Regression Model Analysis")

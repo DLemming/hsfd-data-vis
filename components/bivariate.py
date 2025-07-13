@@ -3,17 +3,39 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 
-from logic.univariate import get_metrical_columns
+from logic.univariate import (
+    get_metrical_columns,
+    get_categorical_columns,
+    get_datetime_columns
+)
+
 
 def plot_corr_heatmap(df: pd.DataFrame):
     """
     Plot a correlation matrix using Plotly with 0s fully transparent,
     and a diverging red-blue color scale.
     """
-    columns = get_metrical_columns(df)
-    numeric_df = df[columns]
+    selected_cols = st.multiselect(
+        "Variable Types",
+        options=['Metrical', 'Ordinal/Categorical', 'Datetime'],
+        default=['Metrical'],
+    )
 
-    corr = numeric_df.corr(method="pearson")
+    columns = []
+    if 'Metrical' in selected_cols:
+        columns = get_metrical_columns(df)
+    if 'Ordinal/Categorical' in selected_cols:
+        columns += get_categorical_columns(df)
+    if 'Datetime' in selected_cols:
+        columns += get_datetime_columns(df)
+
+    if len(columns) < 2:
+        st.warning("At least two columns required for correlation analysis.")
+        return columns
+
+    filtered_df = df[columns]
+
+    corr = filtered_df.corr(method="pearson")
     if corr.isnull().all().all():
         st.warning("Keine gültige Korrelationsmatrix – evtl. nur konstante Werte.")
         return
@@ -59,9 +81,9 @@ def plot_bivariate_scatter(df: pd.DataFrame):
 
     col1, col2 = st.columns(2)
     with col1:
-        x_col = st.selectbox("X-Axis", columns, key="scatter_x", index=5)
+        x_col = st.selectbox("X-Axis", columns, key="scatter_x", index=0)
     with col2:
-        y_col = st.selectbox("Y-Axis", columns, key="scatter_y")
+        y_col = st.selectbox("Y-Axis", columns, key="scatter_y", index=5)
 
     # Only plot if x != y
     if x_col == y_col:
