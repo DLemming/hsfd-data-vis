@@ -35,4 +35,6 @@ def load_taxi_data(filters: dict):
             (df["passenger_count"] <= passenger_count_max)
         ]
 
+    if len(df) == 0:
+        st.warning("Warning: no rows match your filter criteria")
     return df
