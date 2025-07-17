@@ -26,4 +26,13 @@ def load_taxi_data(filters: dict):
         mask = get_healthy_mask(df)
         df = df[mask]
 
+    # NEU: Passenger Count Filter anwenden
+    passenger_count_min = filters.get("passenger_count_min")
+    passenger_count_max = filters.get("passenger_count_max")
+    if passenger_count_min is not None and passenger_count_max is not None:
+        df = df[
+            (df["passenger_count"] >= passenger_count_min) &
+            (df["passenger_count"] <= passenger_count_max)
+        ]
+
     return df
