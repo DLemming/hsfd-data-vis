@@ -27,7 +27,7 @@ tab_selection = st.radio(
         "🚦 Traffic",
         "🧭 Direction",
         "📊 Zone Density",
-        "🧪 Test"
+        "🕳️ Taxi Sinkholes"
     ],
     key="selected_tab",
     horizontal=True
@@ -62,6 +62,6 @@ elif tab_selection == "📊 Zone Density":
     st.subheader("📊 Heatmap by Taxi Zones")
     plot_zone_density_heatmap(df)
 
-elif tab_selection == "Taxi Sinkholes – Net Gain/Loss by Region":
-    st.subheader("Taxi Sinkholes – Net Gain/Loss by Region")
+elif tab_selection == "🕳️ Taxi Sinkholes":
+    st.subheader("Taxi Sinkholes 🕳️ Net Gain/Loss by Region")
     plot_taxi_sinkholes(df)
