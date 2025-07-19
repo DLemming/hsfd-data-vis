@@ -191,7 +191,6 @@ def plot_tip_heatmap(df):
         st.error("CSV must contain 'pickup/dropoff_longitude', 'pickup/dropoff_latitude', 'tip_amount', and 'tpep_pickup_datetime'.")
         return
 
-    st.subheader("💵 Tip Heatmap")
 
     # Select: Pickup or Dropoff
     location_type = st.radio(
@@ -283,7 +282,6 @@ def plot_anomaly_trips(df):
         st.error("CSV must contain pickup/dropoff coordinates, trip_distance, and timestamps.")
         return
 
-    st.subheader("🚨 Suspiciously Slow Trips")
 
     df = df.copy()
     df['tpep_pickup_datetime'] = pd.to_datetime(df['tpep_pickup_datetime'], errors='coerce')
@@ -376,8 +374,6 @@ def plot_traffic_congestion(df):
     if not required.issubset(df.columns):
         st.error("CSV must contain 'pickup_lat/lon', 'tpep_pickup/dropoff_datetime', and 'trip_distance'.")
         return
-
-    st.subheader("🚦 Detecting Traffic Congestion (Heatmap by Hour)")
 
     # Convert to timestamps
     df['tpep_pickup_datetime'] = pd.to_datetime(df['tpep_pickup_datetime'], errors='coerce')
@@ -496,7 +492,6 @@ def plot_zone_density_heatmap(df):
         st.error("CSV must contain pickup/dropoff coordinates and 'tpep_pickup_datetime'.")
         return
 
-    st.subheader("🔥 Zones with the Most Trips (Clustered Heatmap)")
 
     df = df.copy()
     df['tpep_pickup_datetime'] = pd.to_datetime(df['tpep_pickup_datetime'], errors='coerce')
@@ -593,8 +588,6 @@ def plot_taxi_sinkholes(df):
     if not required.issubset(df.columns):
         st.error("CSV must contain pickup/dropoff coordinates.")
         return
-
-    st.subheader("🕳️ Taxi Sinkholes – Net Gain/Loss by Region")
 
     df = df.copy()
     df = df[
