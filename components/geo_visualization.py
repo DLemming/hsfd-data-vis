@@ -287,9 +287,10 @@ def plot_anomaly_trips(df):
     df['tpep_pickup_datetime'] = pd.to_datetime(df['tpep_pickup_datetime'], errors='coerce')
     df['tpep_dropoff_datetime'] = pd.to_datetime(df['tpep_dropoff_datetime'], errors='coerce')
 
-    # Calculate duration and speed
     df['duration_hr'] = (df['tpep_dropoff_datetime'] - df['tpep_pickup_datetime']).dt.total_seconds() / 3600
-    df['speed_kmh'] = df['trip_distance'] / df['duration_hr']
+    df['trip_distance_km'] = df['trip_distance'] * 1.60934
+    df['speed_kmh'] = df['trip_distance_km'] / df['duration_hr']
+
 
     # Keep only valid values
     df = df[
