@@ -51,19 +51,22 @@ def plot_geo_visualization(df):
             threshold=0.03
         ))
     else:
+        # Green for pickups
         layers.append(pdk.Layer(
             "ScatterplotLayer",
             data=df_pickup,
             get_position='[lon, lat]',
-            get_fill_color='[0, 102, 255, 160]',
+            get_fill_color='[0, 255, 0, 160]',  # Green
             get_radius=10
         ))
 
+        # Red for dropoffs
         layers.append(pdk.Layer(
             "ScatterplotLayer",
             data=df_dropoff,
-            get_radius=10,
-            get_position='[lon, lat]'
+            get_position='[lon, lat]',
+            get_fill_color='[255, 0, 0, 160]',  # Red
+            get_radius=10
         ))
 
     # Calculate map center
@@ -81,6 +84,7 @@ def plot_geo_visualization(df):
         ),
         layers=layers
     ))
+
 
 def plot_trip_animation(df):
     required = {
@@ -497,19 +501,6 @@ def plot_zone_density_heatmap(df):
     df = df.copy()
     df['tpep_pickup_datetime'] = pd.to_datetime(df['tpep_pickup_datetime'], errors='coerce')
     df = df.dropna(subset=['tpep_pickup_datetime'])
-
-    # Date filter
-    min_date = df['tpep_pickup_datetime'].dt.date.min()
-    max_date = df['tpep_pickup_datetime'].dt.date.max()
-    if min_date == max_date:
-        selected_date = min_date
-        st.info(f"Only one date available: {min_date}")
-    else:
-        selected_date = st.slider("Select date (24h)", min_value=min_date, max_value=max_date, value=min_date)
-
-    start = pd.Timestamp(selected_date)
-    end = start + pd.Timedelta(days=1)
-    df = df[(df['tpep_pickup_datetime'] >= start) & (df['tpep_pickup_datetime'] < end)]
 
     # Selection: Pickup vs Dropoff
     mode = st.radio("Which locations to show?", options=["Pickup", "Dropoff"], horizontal=True)
