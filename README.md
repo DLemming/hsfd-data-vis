@@ -2,6 +2,8 @@
 
 A simple interactive dashboard for visualizing New York City taxi trip data. Explore trip durations, distances, fares, and more using intuitive controls and real-time plots.
 
+![Alt-Text](taxi-logo.png)
+
 ## Setup
 
 ### 1. Clone the repository:
